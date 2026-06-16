@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BigQuery Release Notes Dashboard</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome for sleek icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar / Header -->
+        <header class="app-header">
+            <div class="brand">
+                <div class="logo-container">
+                    <i class="fa-solid fa-database logo-icon"></i>
+                    <div class="logo-glow"></div>
+                </div>
+                <div class="brand-text">
+                    <h1>BigQuery</h1>
+                    <p class="tagline">Pulse • Release Notes Hub</p>
+                </div>
+            </div>
+            
+            <div class="actions">
+                <div class="search-wrapper">
+                    <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                    <input type="text" id="search-input" placeholder="Search updates...">
+                    <button id="clear-search" class="clear-btn" style="display:none;"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+                
+                <button id="refresh-btn" class="btn btn-primary">
+                    <i class="fa-solid fa-arrows-rotate spinner-icon"></i>
+                    <span>Refresh</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Filters Section -->
+        <section class="filters-section">
+            <div class="filter-group">
+                <span class="filter-label">Filter by Type:</span>
+                <div class="filter-pills" id="type-filters">
+                    <button class="pill active" data-type="all">All Updates</button>
+                    <button class="pill" data-type="feature"><span class="dot feature"></span>Feature</button>
+                    <button class="pill" data-type="changed"><span class="dot changed"></span>Changed</button>
+                    <button class="pill" data-type="deprecated"><span class="dot deprecated"></span>Deprecated</button>
+                    <button class="pill" data-type="resolved"><span class="dot resolved"></span>Resolved</button>
+                    <button class="pill" data-type="update"><span class="dot other"></span>Other</button>
+                </div>
+            </div>
+            <div class="status-summary" id="status-summary">
+                Loading release notes...
+            </div>
+        </section>
+
+        <!-- Main Content Grid -->
+        <main class="main-content">
+            <!-- Loading Skeleton Grid -->
+            <div class="skeleton-grid" id="skeleton-loader">
+                <div class="skeleton-card"></div>
+                <div class="skeleton-card"></div>
+                <div class="skeleton-card"></div>
+                <div class="skeleton-card"></div>
+                <div class="skeleton-card"></div>
+                <div class="skeleton-card"></div>
+            </div>
+
+            <!-- Error State -->
+            <div class="error-container" id="error-container" style="display: none;">
+                <div class="error-icon">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                </div>
+                <h3>Oops! Something went wrong</h3>
+                <p id="error-message">Could not retrieve release notes. Please check your connection and try again.</p>
+                <button id="retry-btn" class="btn btn-secondary">Retry Fetch</button>
+            </div>
+
+            <!-- Empty State -->
+            <div class="empty-container" id="empty-container" style="display: none;">
+                <div class="empty-icon">
+                    <i class="fa-solid fa-folder-open"></i>
+                </div>
+                <h3>No updates found</h3>
+                <p>Try adjusting your search query or filters.</p>
+            </div>
+
+            <!-- Release Notes Cards -->
+            <div class="notes-grid" id="notes-grid" style="display: none;">
+                <!-- Dynamically populated via JS -->
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="app-footer">
+            <p>BigQuery Release Notes Hub • Syncing directly from Google Cloud Platform Feed</p>
+        </footer>
+    </div>
+
+    <!-- Premium Tweet Composer Modal -->
+    <div class="modal-overlay" id="tweet-modal" style="display: none;">
+        <div class="modal-container">
+            <div class="modal-header">
+                <div class="modal-title">
+                    <i class="fa-brands fa-x-twitter twitter-icon"></i>
+                    <span>Draft Tweet</span>
+                </div>
+                <button class="modal-close" id="close-modal"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <p class="modal-instruction">Edit your update below to share on X (Twitter). Standard character limit is 280.</p>
+                
+                <div class="tweet-textarea-wrapper">
+                    <textarea id="tweet-textarea" rows="6" maxlength="500" placeholder="What's happening?"></textarea>
+                </div>
+                
+                <div class="tweet-meta">
+                    <div class="character-counter">
+                        <span id="char-count">0</span> / 280
+                    </div>
+                    <div class="tweet-link-badge">
+                        <i class="fa-solid fa-link"></i> <span id="tweet-url-preview">docs.cloud.google.com...</span>
+                    </div>
+                </div>
+
+                <!-- Live Tweet Preview Box -->
+                <div class="tweet-preview-box">
+                    <div class="preview-header">
+                        <div class="preview-avatar">
+                            <i class="fa-solid fa-user"></i>
+                        </div>
+                        <div class="preview-user-info">
+                            <span class="preview-display-name">You</span>
+                            <span class="preview-username">@your_handle</span>
+                        </div>
+                    </div>
+                    <div class="preview-body" id="tweet-live-preview">
+                        <!-- Live text preview here -->
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="cancel-tweet-btn">Cancel</button>
+                <button class="btn btn-twitter" id="submit-tweet-btn">
+                    <i class="fa-brands fa-x-twitter"></i>
+                    <span>Post to X</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom JS -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
