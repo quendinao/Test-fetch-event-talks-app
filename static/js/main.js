@@ -23,6 +23,7 @@ const elements = {
     emptyContainer: document.getElementById('empty-container'),
     notesGrid: document.getElementById('notes-grid'),
     exportBtn: document.getElementById('export-btn'),
+    toastContainer: document.getElementById('toast-container'),
     
     // Theme Toggle Elements
     themeToggle: document.getElementById('theme-toggle'),
@@ -383,6 +384,9 @@ async function copyToClipboard(release, buttonElement) {
         buttonElement.classList.add('copied');
         buttonElement.setAttribute('title', 'Copied!');
         
+        // Show custom success toast
+        showToast("Copied update to clipboard!", "success");
+        
         // Reset after 1.5 seconds
         setTimeout(() => {
             icon.className = 'fa-regular fa-copy';
@@ -391,7 +395,7 @@ async function copyToClipboard(release, buttonElement) {
         }, 1500);
     } catch (err) {
         console.error('Failed to copy text: ', err);
-        alert('Could not copy text to clipboard. Please select it manually.');
+        showToast('Could not copy text to clipboard. Please select it manually.', 'error');
     }
 }
 
@@ -399,7 +403,7 @@ async function copyToClipboard(release, buttonElement) {
 function exportToCSV() {
     const list = appState.filteredReleases;
     if (!list || list.length === 0) {
-        alert("No release notes found to export.");
+        showToast("No release notes found to export.", "error");
         return;
     }
     
@@ -444,6 +448,8 @@ function exportToCSV() {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    
+    showToast(`Successfully exported ${list.length} updates to CSV!`, 'success');
 }
 
 // Theme Initialization
@@ -468,3 +474,37 @@ function setTheme(theme) {
         localStorage.setItem('theme', 'dark');
     }
 }
+
+// Show premium toast notification
+function showToast(message, type = 'info', duration = 3000) {
+    if (!elements.toastContainer) return;
+
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+
+    // Set icon based on type
+    let iconClass = 'fa-solid fa-circle-info';
+    if (type === 'success') iconClass = 'fa-solid fa-circle-check';
+    if (type === 'error') iconClass = 'fa-solid fa-triangle-exclamation';
+
+    toast.innerHTML = `
+        <i class="${iconClass} toast-icon"></i>
+        <div class="toast-message">${escapeHtml(message)}</div>
+    `;
+
+    elements.toastContainer.appendChild(toast);
+
+    // Fade and slide in
+    setTimeout(() => {
+        toast.classList.add('active');
+    }, 10);
+
+    // Fade and slide out
+    setTimeout(() => {
+        toast.classList.remove('active');
+        setTimeout(() => {
+            toast.remove();
+        }, 300);
+    }, duration);
+}
+
