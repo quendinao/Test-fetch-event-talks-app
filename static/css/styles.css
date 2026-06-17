@@ -824,6 +824,183 @@ body {
     background-color: rgba(0, 0, 0, 0.15);
 }
 
+/* Copy action button hover override */
+.action-btn.btn-copy-action:hover {
+    background-color: var(--accent-cyan);
+    border-color: var(--accent-cyan);
+    color: #040814;
+}
+
+.action-btn.btn-copy-action.copied:hover {
+    background-color: var(--color-feature);
+    border-color: var(--color-feature);
+    color: #040814;
+}
+
+/* Theme Switch styles */
+.theme-switch-container {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-right: 0.5rem;
+}
+
+.theme-toggle-icon {
+    font-size: 0.95rem;
+    color: var(--text-muted);
+    transition: var(--transition-smooth);
+}
+
+.theme-toggle-icon.active {
+    color: var(--accent-cyan);
+    text-shadow: 0 0 10px rgba(56, 189, 248, 0.4);
+}
+
+.theme-switch {
+    position: relative;
+    display: inline-block;
+    width: 40px;
+    height: 20px;
+}
+
+.theme-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(255, 255, 255, 0.08);
+    border: 1px solid var(--border-color);
+    transition: .3s;
+}
+
+.slider::before {
+    position: absolute;
+    content: "";
+    height: 12px;
+    width: 12px;
+    left: 3px;
+    bottom: 3px;
+    background-color: var(--text-secondary);
+    transition: .3s;
+}
+
+input:checked + .slider {
+    background-color: rgba(56, 189, 248, 0.15);
+    border-color: var(--accent-cyan);
+}
+
+input:checked + .slider::before {
+    transform: translateX(20px);
+    background-color: var(--accent-cyan);
+}
+
+.slider.round {
+    border-radius: 34px;
+}
+
+.slider.round::before {
+    border-radius: 50%;
+}
+
+/* Light Mode Variables Override */
+body.light-mode {
+    --bg-primary: #f8fafc;
+    --bg-secondary: #f1f5f9;
+    --bg-card: rgba(255, 255, 255, 0.85);
+    --bg-card-hover: rgba(255, 255, 255, 0.95);
+    
+    --border-color: rgba(15, 23, 42, 0.08);
+    --border-hover: rgba(14, 165, 233, 0.4);
+    
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --text-muted: #64748b;
+    
+    --bg-feature: rgba(16, 185, 129, 0.15);
+    --bg-changed: rgba(245, 158, 11, 0.15);
+    --bg-deprecated: rgba(239, 68, 68, 0.15);
+    --bg-resolved: rgba(99, 102, 241, 0.15);
+    --bg-other: rgba(148, 163, 184, 0.18);
+    
+    --glow-shadow: 0 0 20px rgba(14, 165, 233, 0.15);
+}
+
+body.light-mode {
+    background-image: 
+        radial-gradient(circle at 10% 20%, rgba(203, 213, 225, 0.3) 0%, transparent 80%),
+        radial-gradient(circle at 90% 80%, rgba(226, 232, 240, 0.3) 0%, transparent 80%);
+}
+
+body.light-mode #search-input {
+    background-color: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(15, 23, 42, 0.12);
+}
+
+body.light-mode .filters-section {
+    background-color: rgba(255, 255, 255, 0.6);
+}
+
+body.light-mode .modal-container {
+    background-color: #ffffff;
+    border-color: rgba(15, 23, 42, 0.1);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1), 0 0 40px rgba(14, 165, 233, 0.05);
+}
+
+body.light-mode .modal-overlay {
+    background-color: rgba(15, 23, 42, 0.4);
+}
+
+body.light-mode .modal-title {
+    color: #0f172a;
+}
+
+body.light-mode .twitter-icon {
+    color: #1d9bf0;
+}
+
+body.light-mode .tweet-textarea-wrapper {
+    background-color: rgba(0, 0, 0, 0.02);
+    border-color: rgba(15, 23, 42, 0.1);
+}
+
+body.light-mode #tweet-textarea {
+    color: #0f172a;
+}
+
+body.light-mode .tweet-preview-box {
+    background-color: rgba(0, 0, 0, 0.01);
+    border-color: rgba(15, 23, 42, 0.06);
+}
+
+body.light-mode .tweet-preview-box::before {
+    background-color: #ffffff;
+}
+
+body.light-mode .preview-display-name {
+    color: #0f172a;
+}
+
+body.light-mode .modal-instruction {
+    color: #475569;
+}
+
+body.light-mode .modal-header,
+body.light-mode .modal-footer {
+    border-color: rgba(15, 23, 42, 0.08);
+}
+
+body.light-mode .modal-footer {
+    background-color: rgba(15, 23, 42, 0.02);
+}
+
 /* Responsiveness adjustments */
 @media (max-width: 768px) {
     .app-header {
@@ -853,4 +1030,10 @@ body {
         margin-top: 0.5rem;
         text-align: right;
     }
+    
+    .theme-switch-container {
+        justify-content: center;
+        margin-bottom: 0.5rem;
+    }
 }
+

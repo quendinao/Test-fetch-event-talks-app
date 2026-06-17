@@ -32,12 +32,27 @@
             </div>
             
             <div class="actions">
+                <!-- Theme Toggle -->
+                <div class="theme-switch-container">
+                    <i class="fa-solid fa-moon theme-toggle-icon active" id="dark-icon"></i>
+                    <label class="theme-switch">
+                        <input type="checkbox" id="theme-toggle">
+                        <span class="slider round"></span>
+                    </label>
+                    <i class="fa-solid fa-sun theme-toggle-icon" id="light-icon"></i>
+                </div>
+
                 <div class="search-wrapper">
                     <i class="fa-solid fa-magnifying-glass search-icon"></i>
                     <input type="text" id="search-input" placeholder="Search updates...">
                     <button id="clear-search" class="clear-btn" style="display:none;"><i class="fa-solid fa-xmark"></i></button>
                 </div>
                 
+                <button id="export-btn" class="btn btn-secondary" title="Export current filtered list to CSV">
+                    <i class="fa-solid fa-file-csv"></i>
+                    <span>Export CSV</span>
+                </button>
+
                 <button id="refresh-btn" class="btn btn-primary">
                     <i class="fa-solid fa-arrows-rotate spinner-icon"></i>
                     <span>Refresh</span>

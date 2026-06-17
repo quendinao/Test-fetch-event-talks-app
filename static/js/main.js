@@ -22,6 +22,12 @@ const elements = {
     retryBtn: document.getElementById('retry-btn'),
     emptyContainer: document.getElementById('empty-container'),
     notesGrid: document.getElementById('notes-grid'),
+    exportBtn: document.getElementById('export-btn'),
+    
+    // Theme Toggle Elements
+    themeToggle: document.getElementById('theme-toggle'),
+    darkIcon: document.getElementById('dark-icon'),
+    lightIcon: document.getElementById('light-icon'),
     
     // Tweet Modal Elements
     tweetModal: document.getElementById('tweet-modal'),
@@ -36,6 +42,7 @@ const elements = {
 
 // Initialize Application
 document.addEventListener('DOMContentLoaded', () => {
+    initTheme();
     setupEventListeners();
     fetchReleases();
 });
@@ -45,6 +52,14 @@ function setupEventListeners() {
     // Refresh / Fetch handlers
     elements.refreshBtn.addEventListener('click', fetchReleases);
     elements.retryBtn.addEventListener('click', fetchReleases);
+    
+    // CSV Export handler
+    elements.exportBtn.addEventListener('click', exportToCSV);
+    
+    // Theme Switch handler
+    elements.themeToggle.addEventListener('change', (e) => {
+        setTheme(e.target.checked ? 'light' : 'dark');
+    });
     
     // Search handlers
     elements.searchInput.addEventListener('input', (e) => {
@@ -213,6 +228,9 @@ function createReleaseCard(release) {
             </div>
             
             <div class="share-action-container">
+                <button class="action-btn btn-copy-action" title="Copy update to clipboard">
+                    <i class="fa-regular fa-copy"></i>
+                </button>
                 <button class="action-btn btn-tweet-action" title="Tweet about this specific update">
                     <i class="fa-brands fa-x-twitter"></i>
                 </button>
@@ -230,6 +248,13 @@ function createReleaseCard(release) {
         </div>
     `;
     
+    // Bind Copy click event to button inside the card
+    const copyBtn = card.querySelector('.btn-copy-action');
+    copyBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        copyToClipboard(release, copyBtn);
+    });
+
     // Bind Tweet click event to button inside the card
     const tweetBtn = card.querySelector('.btn-tweet-action');
     tweetBtn.addEventListener('click', (e) => {
@@ -343,4 +368,103 @@ function postTweetToX() {
     window.open(tweetIntentUrl, '_blank', 'width=550,height=420');
     
     closeTweetModal();
+}
+
+// Copy release note text to clipboard
+async function copyToClipboard(release, buttonElement) {
+    const textToCopy = `${release.type} (${release.date}):\n${release.text}\n\nRead more: ${release.link}`;
+    
+    try {
+        await navigator.clipboard.writeText(textToCopy);
+        
+        // Show visual feedback (check icon and class)
+        const icon = buttonElement.querySelector('i');
+        icon.className = 'fa-solid fa-check';
+        buttonElement.classList.add('copied');
+        buttonElement.setAttribute('title', 'Copied!');
+        
+        // Reset after 1.5 seconds
+        setTimeout(() => {
+            icon.className = 'fa-regular fa-copy';
+            buttonElement.classList.remove('copied');
+            buttonElement.setAttribute('title', 'Copy update to clipboard');
+        }, 1500);
+    } catch (err) {
+        console.error('Failed to copy text: ', err);
+        alert('Could not copy text to clipboard. Please select it manually.');
+    }
+}
+
+// Export filtered releases to CSV
+function exportToCSV() {
+    const list = appState.filteredReleases;
+    if (!list || list.length === 0) {
+        alert("No release notes found to export.");
+        return;
+    }
+    
+    // Define headers
+    const headers = ["ID", "Date", "ISO Date", "Type", "Link", "Text"];
+    
+    // Create CSV rows
+    const rows = [
+        headers,
+        ...list.map(release => [
+            release.id,
+            release.date,
+            release.iso_date,
+            release.type,
+            release.link,
+            release.text
+        ])
+    ];
+    
+    // Convert to CSV string, escaping double quotes
+    const csvContent = rows.map(row => 
+        row.map(value => {
+            const strVal = String(value || "");
+            // Escape double quotes by doubling them, wrap field in double quotes
+            return `"${strVal.replace(/"/g, '""')}"`;
+        }).join(",")
+    ).join("\n");
+    
+    // Create a Blob and trigger download
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    
+    // Format filename using active filter/search
+    const filterName = appState.activeFilter;
+    const dateStr = new Date().toISOString().slice(0, 10);
+    const fileName = `bigquery_releases_${filterName}_${dateStr}.csv`;
+    
+    link.setAttribute("href", url);
+    link.setAttribute("download", fileName);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+// Theme Initialization
+function initTheme() {
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    const isLight = savedTheme === 'light';
+    elements.themeToggle.checked = isLight;
+    setTheme(savedTheme);
+}
+
+// Set Active Theme
+function setTheme(theme) {
+    if (theme === 'light') {
+        document.body.classList.add('light-mode');
+        elements.darkIcon.classList.remove('active');
+        elements.lightIcon.classList.add('active');
+        localStorage.setItem('theme', 'light');
+    } else {
+        document.body.classList.remove('light-mode');
+        elements.darkIcon.classList.add('active');
+        elements.lightIcon.classList.remove('active');
+        localStorage.setItem('theme', 'dark');
+    }
 }
